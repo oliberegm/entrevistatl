@@ -25,8 +25,14 @@ public class ExchangeService {
         return exchangeRepository.findByOriginCurrencyAndFinalCurrency(base, target)
             .map(ExchangeRate::getValueRate)
             .switchIfEmpty(exchangeProvider.exchangeRate(base, target)
-                .map(ExchangeRateDTO::getConversionRate)
+                .flatMap(exchangeRateDTO -> save(exchangeRateDTO))
+                .map(ExchangeRate::getValueRate)
                 .map(String::valueOf));
+    }
+
+    private Mono<ExchangeRate   > save(ExchangeRateDTO exchangeRateDTO) {
+        return exchangeRepository.save(new ExchangeRate(null, exchangeRateDTO.getBaseCode(), exchangeRateDTO.getTargetCode(),
+                exchangeRateDTO.getTimeNextUpdateUtc(), String.valueOf(exchangeRateDTO.getConversionRate())));
     }
 
     public Flux<ExchangeRate> getAllExchangeRate() {

@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS EXCHANGE_RATE (
-    id BIGINT NOT NULL,
+    id bigint auto_increment primary key,
     origin_currency varchar(255),
     final_currency varchar(255),
     date_next varchar(255),

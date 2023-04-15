@@ -3,7 +3,6 @@ package com.coralogix.calculator.provider;
 import com.coralogix.calculator.dao.ExchangeRepository;
 import com.coralogix.calculator.dto.ExchangeRateDTO;
 import com.coralogix.calculator.exception.ExchangeProviderException;
-import com.coralogix.calculator.model.ExchangeRate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -27,7 +26,6 @@ public class ExchangeProvider {
             .uri(String.format(URL, base, target))
             .retrieve()
             .bodyToMono(ExchangeRateDTO.class)
-            .doOnNext(exchangeRateDTO -> saveExchangeRate(exchangeRateDTO))
             .onErrorResume(error -> errorApi(error, base, target));
     }
 
@@ -35,12 +33,5 @@ public class ExchangeProvider {
         String message = String.format("error en la llama del api externa %s %s %s", base, target, error.getMessage());
         log.error(message);
         return Mono.error(new ExchangeProviderException(message));
-    }
-
-    private void saveExchangeRate(ExchangeRateDTO exchangeRateDTO) {
-            exchangeRepository.save(new ExchangeRate(null, exchangeRateDTO.getBaseCode(), exchangeRateDTO.getTargetCode(),
-                exchangeRateDTO.getTimeNextUpdateUtc(), String.valueOf(exchangeRateDTO.getConversionRate())))
-                .toFuture().isCompletedExceptionally();
-
     }
 }
